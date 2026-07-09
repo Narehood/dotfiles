@@ -2,6 +2,9 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+# Treat unset variables as an error when substituting
+set -u
+
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
