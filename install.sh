@@ -8,10 +8,14 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 while IFS= read -r -d '' file; do
     filename=$(basename "$file")
-    if [ -e "$HOME/$filename" ]; then
-        # Skip if already the correct symlink
-        if [ -L "$HOME/$filename" ] && [ "$(readlink -f "$HOME/$filename")" = "$(readlink -f "$file")" ]; then
-            continue
+    # -e misses broken symlinks; -L catches those so stale links are backed up
+    if [ -e "$HOME/$filename" ] || [ -L "$HOME/$filename" ]; then
+        # Skip only when the existing symlink truly points at the intended file
+        if [ -L "$HOME/$filename" ]; then
+            existing_target="$(readlink "$HOME/$filename" 2>/dev/null || true)"
+            if [ -n "$existing_target" ] && [ "$existing_target" = "$SCRIPT_DIR/$filename" ]; then
+                continue
+            fi
         fi
         mv -f "$HOME/$filename" "$HOME/${filename}.dtbak"
     fi
@@ -31,10 +35,10 @@ fi
 # Install vim-addons ZSH and ZSH extras when apt is available
 echo "installing extras"
 
-if command -v apt >/dev/null 2>&1; then
-    if ! sudo apt update; then
+if command -v apt-get >/dev/null 2>&1; then
+    if ! sudo apt-get update; then
         echo "Warning: Failed to update package lists. Continuing without packages." >&2
-    elif ! sudo apt -y install vim-scripts zsh zsh-syntax-highlighting zsh-autosuggestions; then
+    elif ! sudo apt-get -y install vim-scripts zsh zsh-syntax-highlighting zsh-autosuggestions; then
         echo "Warning: Failed to install packages. Dotfiles are linked; install zsh plugins manually if needed." >&2
     fi
 else
