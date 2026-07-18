@@ -32,25 +32,64 @@ Appearance is controlled by:
 
 Install copies the defaults there on first run and **never overwrites** an existing file. Repo defaults live in [`config/prompt.conf`](config/prompt.conf).
 
+After editing the config, open a new shell (or `source ~/.zshrc` / `source ~/.bashrc`).
+
+### Available options
+
 | Setting | Values | Default | Description |
 | --- | --- | --- | --- |
-| `PROMPT_ALTERNATIVE` | `twoline`, `oneline`, `backtrack` | `twoline` | Prompt layout |
-| `NEWLINE_BEFORE_PROMPT` | `yes`, `no` | `yes` | Blank line before each prompt |
-| `PROMPT_EMOJI` | any emoji/text | `😈` | Symbol between user and host |
-| `PROMPT_EMOJI_ROOT` | any emoji/text | `💀` | Symbol when running as root |
-| `PROMPT_COLOR_USER` | color name | `green` | Frame color (normal user) |
-| `INFO_COLOR_USER` | color name | `boldblue` | User/host color (normal user) |
-| `PROMPT_COLOR_ROOT` | color name | `brightblue` | Frame color (root) |
-| `INFO_COLOR_ROOT` | color name | `boldred` | User/host color (root) |
-| `SHOW_RPROMPT` | `yes`, `no` | `no` | Zsh right prompt (exit status / jobs) |
+| `PROMPT_ALTERNATIVE` | `twoline`, `oneline`, `backtrack` | `twoline` | Prompt layout (see below) |
+| `NEWLINE_BEFORE_PROMPT` | `yes`, `no` | `yes` | Blank line before each prompt (after the first) |
+| `PROMPT_EMOJI` | any emoji or text | `😈` | Symbol between user and host (normal user) |
+| `PROMPT_EMOJI_ROOT` | any emoji or text | `💀` | Symbol between user and host (root) |
+| `PROMPT_COLOR_USER` | color name | `green` | Frame / path accent color (normal user) |
+| `INFO_COLOR_USER` | color name | `boldblue` | User and host color (normal user) |
+| `PROMPT_COLOR_ROOT` | color name | `brightblue` | Frame / path accent color (root) |
+| `INFO_COLOR_ROOT` | color name | `boldred` | User and host color (root) |
+| `SHOW_RPROMPT` | `yes`, `no` | `no` | Zsh only: right prompt with exit status and background jobs |
 
-Color names: `green`, `blue`, `red`, `yellow`, `cyan`, `magenta`, `white`, `brightblue`, `boldblue`, `boldred`, and similar.
+### Layout options (`PROMPT_ALTERNATIVE`)
 
-After editing the config, open a new shell (or `source ~/.zshrc` / `source ~/.bashrc`).
+| Value | What you get |
+| --- | --- |
+| `twoline` | Kali-style two-line prompt with emoji between user and host |
+| `oneline` | Single-line `user@host:path$` using your configured colors |
+| `backtrack` | Classic BackTrack-style red `user@host` / blue path prompt |
+
+### Color names
+
+Use any of these for the `*_COLOR_*` settings:
+
+| Group | Names |
+| --- | --- |
+| Basic | `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white` |
+| Bright | `brightblack`, `brightred`, `brightgreen`, `brightyellow`, `brightblue`, `brightmagenta`, `brightcyan`, `brightwhite` |
+| Bold | `boldred`, `boldgreen`, `boldblue` |
+
+Underscored bright names also work (for example `bright_blue`).
+
+### Example config
+
+```bash
+# ~/.config/dotfiles/prompt.conf
+
+PROMPT_ALTERNATIVE=twoline
+NEWLINE_BEFORE_PROMPT=yes
+
+PROMPT_EMOJI=😈
+PROMPT_EMOJI_ROOT=💀
+
+PROMPT_COLOR_USER=green
+INFO_COLOR_USER=boldblue
+PROMPT_COLOR_ROOT=brightblue
+INFO_COLOR_ROOT=boldred
+
+SHOW_RPROMPT=no
+```
 
 ### Zsh tip
 
-Press **Ctrl-P** to toggle between twoline and oneline without editing the config.
+Press **Ctrl-P** to toggle between `twoline` and `oneline` without editing the config.
 
 ### Reset to defaults
 
