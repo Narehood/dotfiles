@@ -5,7 +5,8 @@
 if [ -z "${DOTFILES_DIR:-}" ]; then
     _prompt_cfg_src=""
     if [ -n "${ZSH_VERSION:-}" ]; then
-        _prompt_cfg_src="${(%):-%x}"
+        # Keep ${(%):-%x} quoted so Bash does not parse it when sourcing
+        eval '_prompt_cfg_src="${(%):-%x}"'
     elif [ -n "${BASH_SOURCE[0]:-}" ]; then
         _prompt_cfg_src="${BASH_SOURCE[0]}"
     fi

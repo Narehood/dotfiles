@@ -14,7 +14,8 @@ while IFS= read -r -d '' file; do
             rm -f "$HOME/$filename"
         fi
     fi
-    if [ -e "$HOME/${filename}.dtbak" ]; then
+    # -e misses broken symlinks; -L includes them so stale .dtbak links are restored
+    if [ -e "$HOME/${filename}.dtbak" ] || [ -L "$HOME/${filename}.dtbak" ]; then
         mv -f "$HOME/${filename}.dtbak" "$HOME/$filename"
     fi
 done < <(find "$SCRIPT_DIR" -maxdepth 1 -name ".*" -type f -print0)
