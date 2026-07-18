@@ -91,18 +91,42 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
+# Resolve this rc to the dotfiles repo (follows symlink), then load prompt settings
+if [ -z "${DOTFILES_DIR:-}" ]; then
+    _dotfiles_rc="${(%):-%N}"
+    if command -v readlink >/dev/null 2>&1; then
+        _dotfiles_rc="$(readlink -f "$_dotfiles_rc" 2>/dev/null || readlink "$_dotfiles_rc" 2>/dev/null || echo "$_dotfiles_rc")"
+    fi
+    DOTFILES_DIR="$(cd "$(dirname "$_dotfiles_rc")" && pwd)"
+    unset _dotfiles_rc
+fi
+if [ -f "$DOTFILES_DIR/lib/prompt-config.sh" ]; then
+    # shellcheck disable=SC1091
+    . "$DOTFILES_DIR/lib/prompt-config.sh"
+fi
+
 configure_prompt() {
-    prompt_symbol=😈
-    # Skull emoji for root terminal
-    #[ "$EUID" -eq 0 ] && prompt_symbol=💀
+    local prompt_symbol frame_color info_color
+    prompt_symbol="$(prompt_active_emoji)"
+    if [ "$EUID" -eq 0 ]; then
+        frame_color="$(prompt_zsh_color "$PROMPT_COLOR_ROOT")"
+        info_color="$(prompt_zsh_color "$INFO_COLOR_ROOT")"
+    else
+        frame_color="$(prompt_zsh_color "$PROMPT_COLOR_USER")"
+        info_color="$(prompt_zsh_color "$INFO_COLOR_USER")"
+    fi
+
     case "$PROMPT_ALTERNATIVE" in
         twoline)
-            PROMPT=$'%F{%(#.blue.green)}┌──${debian_chroot:+($debian_chroot)─}${VIRTUAL_ENV:+($(basename $VIRTUAL_ENV))─}(%B%F{%(#.red.blue)}%n'$prompt_symbol$'%m%b%F{%(#.blue.green)})-[%B%F{reset}%(6~.%-1~/…/%4~.%5~)%b%F{%(#.blue.green)}]\n└─%B%(#.%F{red}#.%F{blue}$)%b%F{reset} '
-            # Right-side prompt with exit codes and background processes
-            #RPROMPT=$'%(?.. %? %F{red}%B⨯%b%F{reset})%(1j. %j %F{yellow}%B⚙%b%F{reset}.)'
+            PROMPT="%F{${frame_color}}┌──\${debian_chroot:+(\$debian_chroot)─}\${VIRTUAL_ENV:+(\$(basename \$VIRTUAL_ENV))─}(%B%F{${info_color}}%n${prompt_symbol}%m%b%F{${frame_color}})-[%B%F{reset}%(6~.%-1~/…/%4~.%5~)%b%F{${frame_color}}]"$'\n'"└─%B%(#.%F{${info_color}}#.%F{${info_color}}$)%b%F{reset} "
+            if [ "$SHOW_RPROMPT" = yes ]; then
+                RPROMPT=$'%(?.. %? %F{red}%B⨯%b%F{reset})%(1j. %j %F{yellow}%B⚙%b%F{reset}.)'
+            else
+                RPROMPT=
+            fi
             ;;
         oneline)
-            PROMPT=$'${debian_chroot:+($debian_chroot)}${VIRTUAL_ENV:+($(basename $VIRTUAL_ENV))}%B%F{%(#.red.blue)}%n@%m%b%F{reset}:%B%F{%(#.blue.green)}%~%b%F{reset}%(#.#.$) '
+            PROMPT=$'${debian_chroot:+($debian_chroot)}${VIRTUAL_ENV:+($(basename $VIRTUAL_ENV))}%B%F{'"${info_color}"'}%n@%m%b%F{reset}:%B%F{'"${frame_color}"'}%~%b%F{reset}%(#.#.$) '
             RPROMPT=
             ;;
         backtrack)
@@ -110,15 +134,7 @@ configure_prompt() {
             RPROMPT=
             ;;
     esac
-    unset prompt_symbol
 }
-
-# The following block is surrounded by two delimiters.
-# These delimiters must not be modified. Thanks.
-# START KALI CONFIG VARIABLES
-PROMPT_ALTERNATIVE=twoline
-NEWLINE_BEFORE_PROMPT=yes
-# STOP KALI CONFIG VARIABLES
 
 if [ "$color_prompt" = yes ]; then
     # override default virtualenv indicator in prompt
